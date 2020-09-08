@@ -1,0 +1,76 @@
+//script for electro prints - exhibition Galerie de Maaskoe Rotterdam
+//2020 Beam Contrechoc
+//ATtiny85
+
+void setup() {
+
+  pinMode(0, OUTPUT);
+  pinMode(1, OUTPUT);
+  pinMode(2, OUTPUT);
+  pinMode(3, OUTPUT);
+  pinMode(4, OUTPUT);
+
+  allLEDON();
+  delay(5000);
+  allLEDOFF();
+
+}
+
+void allLEDON() {
+  digitalWrite(0, HIGH);
+  digitalWrite(1, HIGH);
+  digitalWrite(2, HIGH);
+  digitalWrite(3, HIGH);
+  digitalWrite(4, HIGH);
+}
+void allLEDOFF() {
+  digitalWrite(0, LOW);
+  digitalWrite(1, LOW);
+  digitalWrite(2, LOW);
+  digitalWrite(3, LOW);
+  digitalWrite(4, LOW);
+}
+
+void round1(int delayTime1, int delayTime2) {
+
+  ledOnOff(0,   delayTime1,   delayTime2);
+  ledOnOff(1,   delayTime1,   delayTime2);
+  ledOnOff(2,   delayTime1,   delayTime2);
+  ledOnOff(3,   delayTime1,   delayTime2);
+  ledOnOff(4,   delayTime1,   delayTime2);
+
+}
+
+void ledOnOff(int ledNumber, int delayTime1, int delayTime2) {
+  digitalWrite(ledNumber, HIGH);   // turn the LED on (HIGH is the voltage level)
+  delay(delayTime1);                       // wait for a second
+  digitalWrite( ledNumber, LOW);    // turn the LED off by making the voltage LOW
+  delay(delayTime2);
+}
+
+void loop() {
+  // wait for a second
+  round1(50 + random(300), 50 + random(300));
+  delay(1000 * random(5));
+  int h = random(15);
+  if ( h == 1)
+  {
+    allLEDON();
+    delay(5000);
+    allLEDOFF();
+  }
+  if ( h == 2)
+  {
+    for (int i = 0; i < 20; i++)
+    {
+      ledOnOff(random(6),   50,   50);
+    }
+  }
+   if ( h == 3)
+  {
+    for (int i = 0; i < 20; i++)
+    {
+      ledOnOff(0,   random(50),   random(50));
+    }
+  }
+}
