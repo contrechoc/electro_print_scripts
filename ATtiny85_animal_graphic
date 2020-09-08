@@ -1,0 +1,292 @@
+//script for electro prints - exhibition Galerie de Maaskoe Rotterdam
+//2020 Beam Contrechoc
+//ATtiny85
+
+int led0 = 0;
+int led1 = 1;
+int led2 = 2;
+int led3 = 3;
+int led4 = 4;
+
+#define PIN_OUT        1
+#define UNIT_LENGTH 120
+
+long timer;
+String morseWord = "";
+const char *nameString = "animal";
+
+void setup() {
+  ALLOUT();
+  allLEDON();
+  delay(5000);
+  allLEDOFF();
+
+}
+
+void allLEDON() {
+  digitalWrite(led0, HIGH);
+  digitalWrite(led1, HIGH);
+  digitalWrite(led2, HIGH);
+  digitalWrite(led3, HIGH);
+  digitalWrite(led4, HIGH);
+}
+void allLEDOFF() {
+  digitalWrite(led0, LOW);
+  digitalWrite(led1, LOW);
+  digitalWrite(led2, LOW);
+  digitalWrite(led3, LOW);
+  digitalWrite(led4, LOW);
+}
+
+void ALLOUT() {
+  pinMode(0, OUTPUT);
+  pinMode(1, OUTPUT);
+  pinMode(2, OUTPUT);
+  pinMode(3, OUTPUT);
+  pinMode(4, OUTPUT);
+
+}
+
+void loop() {
+
+  if ( timer < millis())
+  {
+
+    int h = random (5);
+    if ( h == 0 )
+    { //morsecode
+      digitalWrite(led0, HIGH);
+      morseWord = encode( nameString );
+      doMorseCode();
+      digitalWrite(led0, LOW);
+    }
+    else if ( h == 1 )
+    {
+      digitalWrite(led1, HIGH);
+      fader(4);
+      fader(5);
+      digitalWrite(led1, LOW);
+    }
+    else if ( h == 2 )
+    {
+      digitalWrite(led1, HIGH);
+      int j = random(10) + 2;
+      for (int i = 0; i < j ; i++)
+      {
+        digitalWrite(led3, HIGH);
+        digitalWrite(led4, LOW);
+        delay(random(500));
+        digitalWrite(led3, LOW);
+        digitalWrite(led4, HIGH);
+        delay(random(500));
+      }
+      digitalWrite(led1, LOW);
+    }
+    else if ( h == 3 )
+    {
+
+      int j = random(4) + 2;
+      for (int i = 0; i < j ; i++)
+      {
+        digitalWrite(led1, HIGH);
+        delay(100);
+        digitalWrite(led1, LOW);
+        delay(100);
+        digitalWrite(led0, HIGH);
+        delay(100);
+        digitalWrite(led0, LOW);
+        delay(100);
+        delay(1000 + random(1000));
+      }
+    }
+
+    else if ( h == 4 )
+    {
+      allLEDON();
+      delay(1000 + random(3000));
+      allLEDOFF();
+      delay(1000 + random(3000));
+    }
+
+    timer = millis() + 1000 + random(2000);
+  }
+}
+
+void fader(int whichLED)
+{
+  for (int fadeValue = 0 ; fadeValue <= 255; fadeValue += 5) {
+    analogWrite(whichLED, fadeValue);
+    delay(10);
+  }
+  for (int fadeValue = 255 ; fadeValue >= 0; fadeValue -= 5) {
+    analogWrite(whichLED, fadeValue);
+    delay(10);
+  }
+}
+
+int iMorseCodeCounter = 0;
+//Build a struct with the morse code mapping
+static const struct {
+  const char letter, *code;
+}
+MorseMap[] =
+{
+  {
+    'A', ".-"
+  }
+  ,
+  {
+    'B', "-..."
+  }
+  ,
+  {
+    'C', "-.-."
+  }
+  ,
+  {
+    'D', "-.."
+  }
+  ,
+  {
+    'E', "."
+  }
+  ,
+  {
+    'F', "..-."
+  }
+  ,
+  {
+    'G', "--."
+  }
+  ,
+  {
+    'H', "...."
+  }
+  ,
+  {
+    'I', ".."
+  }
+  ,
+  {
+    'J', ".---"
+  }
+  ,
+  {
+    'K', "-.-"
+  }
+  ,
+  {
+    'L', ".-.."
+  }
+  ,
+  {
+    'M', "--"
+  }
+  ,
+  {
+    'N', "-."
+  }
+  ,
+  {
+    'O', "---"
+  }
+  ,
+  {
+    'P', ".--."
+  }
+  ,
+  {
+    'Q', "--.-"
+  }
+  ,
+  {
+    'R', ".-."
+  }
+  ,
+  {
+    'S', "..."
+  }
+  ,
+  {
+    'T', "-"
+  }
+  ,
+  {
+    'U', "..-"
+  }
+  ,
+  {
+    'V', "...-"
+  }
+  ,
+  {
+    'W', ".--"
+  }
+  ,
+  {
+    'X', "-..-"
+  }
+  ,
+  //{ 'Y', "-.--" },
+  //{ 'Z', "--.." },
+  {
+    ' ', "     "
+  }
+  , //Gap between word, seven units
+
+};
+
+
+String encode( const char *string)
+{
+  size_t i, j;
+  String morseWord = "";
+
+  for ( i = 0; string[i]; ++i )
+  {
+    for ( j = 0; j < sizeof MorseMap / sizeof * MorseMap; ++j )
+    {
+      if ( toupper(string[i]) == MorseMap[j].letter )
+      {
+        morseWord += MorseMap[j].code;
+        break;
+      }
+    }
+    morseWord += " "; //Add tailing space to seperate the chars
+  }
+
+  return morseWord;
+}
+
+
+void doMorseCode() {
+
+  while ( iMorseCodeCounter <= morseWord.length())
+  {
+    switch ( morseWord[iMorseCodeCounter] )
+    {
+      case '.': //dit
+        PORTB |= (1 << led3);
+        delay( UNIT_LENGTH );
+        PORTB &= ~(1 << led3);
+        delay( UNIT_LENGTH );
+
+        break;
+
+      case '-': //dah
+        PORTB |= (1 << led4);
+        delay( UNIT_LENGTH * 5 );
+        PORTB &= ~(1 << led4);
+        delay( UNIT_LENGTH );
+
+        break;
+
+      case ' ': //gap
+        delay( UNIT_LENGTH );
+
+        break;
+    }
+    iMorseCodeCounter++;
+  }
+  iMorseCodeCounter = 0;
+}
